@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { check } from 'express-validator';
-import { login, register } from './auth.controller.js';
+import { login, register, updateUser } from './auth.controller.js';
 import { validateFields } from '../middlewares/validateFields.js';
 import { existentEmail } from '../helpers/dbValidators.js';
 import { existentUsername } from '../helpers/dbValidators.js';
+import { validateJWT } from '../middlewares/validate-jwt.js';
 
 const router = Router();
 
@@ -24,5 +25,10 @@ router.post('/register', [
     check('email').custom(existentEmail),
     validateFields
 ], register);
+
+router.put('/update', [
+    validateJWT,
+    validateFields
+], updateUser)
 
 export default router;

@@ -2,6 +2,7 @@ import bcryptjs from 'bcryptjs';
 import User from '../user/user.model.js';
 import { generateJWT } from '../helpers/generateJWT.js';
 
+let exportedToken = '';
 export const register = async (req, res) => {
     try {
         const { userName, name, email, password } = req.body;
@@ -33,12 +34,11 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        //verificar si el email existe:
         const user = await User.findOne({ email: email.toLowerCase() });
 
         if (user && (await bcryptjs.compare(password, user.password))) {
             const token = await generateJWT(user.id, user.email)
-
+            exportedToken = token;
             res.status(200).json({
                 msg: "Login Ok!!!",
                 userDetails: {
@@ -48,13 +48,14 @@ export const login = async (req, res) => {
             });
         }
 
+        // console.log(exportedToken)
+
         if (!user) {
             return res
                 .status(400)
                 .send(`Wrong credentials, ${email} doesn't exists on database`);
         }
 
-        // verificar la contraseña
         const validPassword = bcryptjs.compareSync(password, user.password);
         if (!validPassword) {
             return res.status(400).send("wrong password");
@@ -63,3 +64,32 @@ export const login = async (req, res) => {
         res.status(500).send("Something went wrong on the server");
     }
 };
+
+
+export const updateUser = async (req, res) => {
+    try {
+        const user = req.user;
+        const { idToChange, role } = req.body;
+
+
+        if (user.role !== 'ADMIN_ROLE') {
+            return res.status(401).json({
+                msg: "You don't have permission to update this user"
+            });
+
+        }
+        console.log("este es el role " + user.role);
+        await User.findByIdAndUpdate(idToChange, {role: role});
+
+        return res.status(200).json({
+            msg: "User has been updated"
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            msg: "Something went wrong on the server",
+        });
+    }
+};
+
+export { exportedToken };
