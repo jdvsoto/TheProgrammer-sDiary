@@ -26,6 +26,10 @@ const PublicationSchema = new mongoose.Schema({
     img: {
         type: String,
     },
+    status: {
+        type: Boolean,
+        default: true,
+    },
 });
 
 const Publication = mongoose.model('Publication', PublicationSchema);

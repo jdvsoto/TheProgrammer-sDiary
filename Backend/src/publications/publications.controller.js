@@ -41,29 +41,75 @@ export const createPublication = async (req, res) => {
             });
         }
     });
-
-
-
-    // try {
-    //     const { title, content } = req.body;
-    //     // const validattion = validateImg(req.file, 'Y');
-
-    //         const newPublication = new Publication({
-    //             title,
-    //             content,
-    //             author: req.user._id,
-    //         });
-    //         await newPublication.save();
-
-    //         return res.status(200).json({
-    //             msg: "Publication has been created",
-    //             publication: newPublication,
-    //         });
-
-    // } catch (error) {
-    //     return res.status(500).json({
-    //         msg: "Publication has not been created",
-    //         errors: error,
-    //     });
-    // }
 }
+
+export const getPublicationsById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const publications =  await Publication.findOne({_id: id});
+        return res.status(200).json({
+            msg: "Publications have been found",
+            publications,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            msg: "Publications have not been found",
+            errors: error,
+        });
+    }
+}
+
+export const getPublications = async (req, res) => {
+    try {
+        const publications =  await Publication.find();
+        return res.status(200).json({
+            msg: "Publications have been found",
+            publications,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            msg: "Publications have not been found",
+            errors: error,
+        });
+    }
+};
+
+export const updatePublication = async (req, res) => {
+    upload.single('img')(req, res, async (err) => {
+        if (err) {
+            console.log(req.file);
+            return res.status(500).json({
+                msg: "Image has not been uploaded",
+                errors: err.message,
+            });
+
+        }
+        try {
+            const { id } = req.params;
+            const { title, content } = req.body;
+            const publication = await Publication.findOne({_id: id});
+            if (!publication) {
+                return res.status(404).json({
+                    msg: "Publication has not been found",
+                });
+            }
+
+            console.log(publication);
+            const newPublication = {
+                title,
+                content,
+                img: req.file.path,
+            };
+            const updatedPublication = await Publication.findOneAndUpdate({_id: id}, newPublication);
+            return res.status(200).json({
+                msg: "Publication has been updated",
+                publication: updatedPublication,
+            });
+        } catch (error) {
+            return res.status(500).json({
+                msg: "Publication has not been updated",
+                errors: error,
+            });
+        }
+    });
+};
