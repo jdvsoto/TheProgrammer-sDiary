@@ -7,6 +7,7 @@ import morgan from 'morgan';
 import { dbConnection } from './mongo.js';
 
 import authRoutes from '../src/auth/auth.routes.js';
+import publicationRoutes from '../src/publications/publications.routes.js';
 
 class Server {
     constructor() {
@@ -14,6 +15,7 @@ class Server {
         this.port = process.env.PORT;
 
         this.authPath = '/ProgrammersDiary/v1/auth';
+        this.publicationPath = '/ProgrammersDiary/v1/publications';
 
         this.middlewares();
         this.connectDB();
@@ -30,10 +32,12 @@ class Server {
         this.app.use(cors());
         this.app.use(helmet());
         this.app.use(morgan('dev'));
+        this.app.use(express.static('public'));
     }
 
     routes() {
         this.app.use(this.authPath, authRoutes);
+        this.app.use(this.publicationPath, publicationRoutes);
     }
 
     listen() {

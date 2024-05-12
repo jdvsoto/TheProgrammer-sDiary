@@ -1,5 +1,4 @@
 import User from '../user/user.model.js';
-
 export const existentEmail = async (email = '') => {
     const exists = await User.findOne({ email });
     if (exists) {
@@ -20,3 +19,16 @@ export const existentUsername = async (userName = '') => {
         throw new Error(`The username ${userName} is already registered`);
     }
 }
+
+// export const validateImg = (validated, img) => {
+//     var errors = [];
+//     if (validated === 'Y' && img === undefined) {
+//         errors.push('Select an image on fomrmat jpg, jpeg or png');
+//     } else {
+//         if (errors != '') {
+//             fs.unlinkSync('./public/uploads/' + img.filename);
+//         }
+//     }
+//     return errors;
+
+// };
