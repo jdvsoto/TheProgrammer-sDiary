@@ -13,7 +13,7 @@ export const createPublication = async (req, res) => {
         try {
             const user = req.user;
             const { title, content } = req.body;
-            if (user.role !== "ADMIN_ROLE" ) {
+            if (user.role !== "ADMIN_ROLE") {
                 return res.status(401).json({
                     msg: "You are not authorized to create a publication",
                 });
@@ -46,7 +46,8 @@ export const createPublication = async (req, res) => {
 export const getPublicationsById = async (req, res) => {
     try {
         const { id } = req.params;
-        const publications =  await Publication.findOne({_id: id});
+        const publications = await Publication.findOne({ _id: id });
+
         return res.status(200).json({
             msg: "Publications have been found",
             publications,
@@ -61,7 +62,7 @@ export const getPublicationsById = async (req, res) => {
 
 export const getPublications = async (req, res) => {
     try {
-        const publications =  await Publication.find();
+        const publications = await Publication.find();
         return res.status(200).json({
             msg: "Publications have been found",
             publications,
@@ -85,9 +86,16 @@ export const updatePublication = async (req, res) => {
 
         }
         try {
+            const user = req.user;
             const { id } = req.params;
-            const { title, content } = req.body;
-            const publication = await Publication.findOne({_id: id});
+            const { title, content, status } = req.body;
+            
+            if (user.role !== "ADMIN_ROLE") {
+                return res.status(401).json({
+                    msg: "You are not authorized to see this publication",
+                });
+            }
+            const publication = await Publication.findOne({ _id: id });
             if (!publication) {
                 return res.status(404).json({
                     msg: "Publication has not been found",
@@ -98,12 +106,12 @@ export const updatePublication = async (req, res) => {
             const newPublication = {
                 title,
                 content,
+                status,
                 img: req.file.path,
             };
-            const updatedPublication = await Publication.findOneAndUpdate({_id: id}, newPublication);
+            const updatedPublication = await Publication.findOneAndUpdate({ _id: id }, newPublication);
             return res.status(200).json({
-                msg: "Publication has been updated",
-                publication: updatedPublication,
+                msg: "Publication has been updated"
             });
         } catch (error) {
             return res.status(500).json({
@@ -112,4 +120,25 @@ export const updatePublication = async (req, res) => {
             });
         }
     });
+};
+
+export const deletePublication = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = req.user;
+        if (user.role !== "ADMIN_ROLE") {
+            return res.status(401).json({
+                msg: "You are not authorized to see this publication",
+            });
+        }
+        await Publication.findByIdAndUpdate({ _id: id }, { status: false });
+        return res.status(200).json({
+            msg: "Publication has been deleted",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            msg: "Publication has not been deleted",
+            errors: error,
+        });
+    }
 };
